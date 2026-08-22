@@ -64,6 +64,11 @@ jobs:
         run: gh release upload ${{needs.get_last_release.outputs.latest_release_tag}} ironbar-${{needs.get_last_release.outputs.latest_release_tag}}-${{matrix.platform.name}}.tar.gz
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ironbar-${{matrix.platform.name}}
+          path: ironbar-${{needs.get_last_release.outputs.latest_release_tag}}-${{matrix.platform.name}}.tar.gz
   on-failure:
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'failure' }}
