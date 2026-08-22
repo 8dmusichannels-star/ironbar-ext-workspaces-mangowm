@@ -3,27 +3,13 @@ on:
   workflow_run:
     workflows: [ Deploy ]
     types: [ completed ]
-  release:
-    types: [ created ]
   workflow_dispatch:
 jobs:
-  get_last_release:
-    runs-on: ubuntu-latest
-    outputs:
-      latest_release_tag: ${{ steps.latest-release.outputs.LATEST_RELEASE_TAG }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Extract the latest release
-        id: latest-release
-        run: echo "LATEST_RELEASE_TAG=$(gh release view --json tagName -q .tagName)" >> $GITHUB_OUTPUT
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   build:
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     name: Build
     runs-on: ${{matrix.platform.image}}
     container: ghcr.io/jakestanger/ironbar-build:master
-    needs: get_last_release
     strategy:
       fail-fast: false
       matrix:
@@ -32,12 +18,18 @@ jobs:
           - { image: ubuntu-24.04-arm, name: arm64 }
     steps:
       - uses: actions/checkout@v4
+<<<<<<< HEAD
         with:
           ref: ${{ needs.get_last_release.outputs.latest_release_tag }}
 <<<<<<< HEAD
 
 ||||||| parent of 7dcea07 (Update GitHub Actions workflow to extract latest release)
 
+||||||| parent of 98ab65d (Added mangowm compositor handling and workspaces supporting and Updated.)
+        with:
+          ref: ${{ needs.get_last_release.outputs.latest_release_tag }}
+=======
+>>>>>>> 98ab65d (Added mangowm compositor handling and workspaces supporting and Updated.)
       - name: Add OpenSSL crate (vendored)
         run: cargo add openssl --features vendored
 
@@ -47,8 +39,8 @@ jobs:
 >>>>>>> 7dcea07 (Update GitHub Actions workflow to extract latest release)
       - name: Build Release
         run: cargo build --locked --release
-
       - name: Compress the built binary
+<<<<<<< HEAD
 <<<<<<< HEAD
         run: tar -zcvf ironbar-${{needs.get_last_release.outputs.latest_release_tag}}-${{matrix.platform.name}}.tar.gz -C target/tagged-release ironbar
 
@@ -64,11 +56,22 @@ jobs:
         run: gh release upload ${{needs.get_last_release.outputs.latest_release_tag}} ironbar-${{needs.get_last_release.outputs.latest_release_tag}}-${{matrix.platform.name}}.tar.gz
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+||||||| parent of 98ab65d (Added mangowm compositor handling and workspaces supporting and Updated.)
+        run: tar -zcvf ironbar-${{needs.get_last_release.outputs.latest_release_tag}}-${{matrix.platform.name}}.tar.gz -C target/release ironbar
+      - name: Take ownership of repo
+        run: git config --global --add safe.directory .
+      - name: Upload to release
+        run: gh release upload ${{needs.get_last_release.outputs.latest_release_tag}} ironbar-${{needs.get_last_release.outputs.latest_release_tag}}-${{matrix.platform.name}}.tar.gz
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+=======
+        run: tar -zcvf ironbar-${{matrix.platform.name}}.tar.gz -C target/release ironbar
+>>>>>>> 98ab65d (Added mangowm compositor handling and workspaces supporting and Updated.)
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: ironbar-${{matrix.platform.name}}
-          path: ironbar-${{needs.get_last_release.outputs.latest_release_tag}}-${{matrix.platform.name}}.tar.gz
+          path: ironbar-${{matrix.platform.name}}.tar.gz
   on-failure:
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'failure' }}
