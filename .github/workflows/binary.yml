@@ -6,7 +6,6 @@ on:
   release:
     types: [ created ]
   workflow_dispatch:
-
 jobs:
   get_last_release:
     runs-on: ubuntu-latest
@@ -16,11 +15,9 @@ jobs:
       - uses: actions/checkout@v4
       - name: Extract the latest release
         id: latest-release
-        run: echo "LATEST_RELEASE_TAG=$(gh release ls --json isLatest,tagName -q '.[] | select(.isLatest == true) | .tagName')" >> $GITHUB_OUTPUT
+        run: echo "LATEST_RELEASE_TAG=$(gh release view --json tagName -q .tagName)" >> $GITHUB_OUTPUT
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-
   build:
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     name: Build
@@ -33,33 +30,43 @@ jobs:
         platform:
           - { image: ubuntu-latest, name: x86_64 }
           - { image: ubuntu-24.04-arm, name: arm64 }
-
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ needs.get_last_release.outputs.latest_release_tag }}
+<<<<<<< HEAD
 
+||||||| parent of 7dcea07 (Update GitHub Actions workflow to extract latest release)
+
+      - name: Add OpenSSL crate (vendored)
+        run: cargo add openssl --features vendored
+
+=======
+      - name: Add OpenSSL crate (vendored)
+        run: cargo add openssl --features vendored
+>>>>>>> 7dcea07 (Update GitHub Actions workflow to extract latest release)
       - name: Build Release
-        run: cargo build --locked --profile tagged-release
-        
-      - name: list packages
-        run: ls target/release
-        
+        run: cargo build --locked --release
+
       - name: Compress the built binary
+<<<<<<< HEAD
         run: tar -zcvf ironbar-${{needs.get_last_release.outputs.latest_release_tag}}-${{matrix.platform.name}}.tar.gz -C target/tagged-release ironbar
 
+||||||| parent of 7dcea07 (Update GitHub Actions workflow to extract latest release)
+        run: tar -zcvf ironbar-${{needs.get_last_release.outputs.latest_release_tag}}-${{matrix.platform.name}}.tar.gz -C target/release ironbar
+
+=======
+        run: tar -zcvf ironbar-${{needs.get_last_release.outputs.latest_release_tag}}-${{matrix.platform.name}}.tar.gz -C target/release ironbar
+>>>>>>> 7dcea07 (Update GitHub Actions workflow to extract latest release)
       - name: Take ownership of repo
         run: git config --global --add safe.directory .
-
       - name: Upload to release
         run: gh release upload ${{needs.get_last_release.outputs.latest_release_tag}} ironbar-${{needs.get_last_release.outputs.latest_release_tag}}-${{matrix.platform.name}}.tar.gz
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   on-failure:
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'failure' }}
-
     steps:
       - run: echo 'The triggering workflow Deploy failed'
       - run: exit 1
