@@ -18,55 +18,20 @@ jobs:
           - { image: ubuntu-24.04-arm, name: arm64 }
     steps:
       - uses: actions/checkout@v4
-<<<<<<< HEAD
         with:
           ref: ${{ needs.get_last_release.outputs.latest_release_tag }}
-<<<<<<< HEAD
-
-||||||| parent of 7dcea07 (Update GitHub Actions workflow to extract latest release)
-
-||||||| parent of 98ab65d (Added mangowm compositor handling and workspaces supporting and Updated.)
-        with:
-          ref: ${{ needs.get_last_release.outputs.latest_release_tag }}
-=======
->>>>>>> 98ab65d (Added mangowm compositor handling and workspaces supporting and Updated.)
       - name: Add OpenSSL crate (vendored)
         run: cargo add openssl --features vendored
-
-=======
-      - name: Add OpenSSL crate (vendored)
-        run: cargo add openssl --features vendored
->>>>>>> 7dcea07 (Update GitHub Actions workflow to extract latest release)
       - name: Build Release
         run: cargo build --locked --release
       - name: Compress the built binary
-<<<<<<< HEAD
-<<<<<<< HEAD
         run: tar -zcvf ironbar-${{needs.get_last_release.outputs.latest_release_tag}}-${{matrix.platform.name}}.tar.gz -C target/tagged-release ironbar
-
-||||||| parent of 7dcea07 (Update GitHub Actions workflow to extract latest release)
-        run: tar -zcvf ironbar-${{needs.get_last_release.outputs.latest_release_tag}}-${{matrix.platform.name}}.tar.gz -C target/release ironbar
-
-=======
-        run: tar -zcvf ironbar-${{needs.get_last_release.outputs.latest_release_tag}}-${{matrix.platform.name}}.tar.gz -C target/release ironbar
->>>>>>> 7dcea07 (Update GitHub Actions workflow to extract latest release)
       - name: Take ownership of repo
         run: git config --global --add safe.directory .
       - name: Upload to release
         run: gh release upload ${{needs.get_last_release.outputs.latest_release_tag}} ironbar-${{needs.get_last_release.outputs.latest_release_tag}}-${{matrix.platform.name}}.tar.gz
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-||||||| parent of 98ab65d (Added mangowm compositor handling and workspaces supporting and Updated.)
-        run: tar -zcvf ironbar-${{needs.get_last_release.outputs.latest_release_tag}}-${{matrix.platform.name}}.tar.gz -C target/release ironbar
-      - name: Take ownership of repo
-        run: git config --global --add safe.directory .
-      - name: Upload to release
-        run: gh release upload ${{needs.get_last_release.outputs.latest_release_tag}} ironbar-${{needs.get_last_release.outputs.latest_release_tag}}-${{matrix.platform.name}}.tar.gz
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-=======
-        run: tar -zcvf ironbar-${{matrix.platform.name}}.tar.gz -C target/release ironbar
->>>>>>> 98ab65d (Added mangowm compositor handling and workspaces supporting and Updated.)
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
